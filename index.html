@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Praneeth Creativity Certificates</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f4f8ff;
+}
+
+header {
+  background: #1e40af;
+  color: white;
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pfp {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: white;
+  color: #1e40af;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.menu {
+  position: absolute;
+  right: 20px;
+  top: 65px;
+  background: white;
+  border-radius: 6px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  display: none;
+}
+
+.menu div {
+  padding: 10px 15px;
+  cursor: pointer;
+}
+
+.menu div:hover {
+  background: #eef2ff;
+}
+
+section {
+  padding: 40px;
+  text-align: center;
+}
+
+input {
+  padding: 10px;
+  width: 220px;
+  margin: 6px;
+}
+
+button {
+  padding: 10px 20px;
+  background: #2563eb;
+  border: none;
+  color: white;
+  cursor: pointer;
+  border-radius: 5px;
+}
+</style>
+</head>
+
+<body>
+
+<div id="authScreen">
+  <section>
+    <h2>Praneeth Creativity Certificates</h2>
+
+    <input id="username" placeholder="Username"><br>
+    <input id="password" type="password" placeholder="Password"><br><br>
+
+    <button onclick="login()">Login</button>
+    <button onclick="signup()">Sign Up</button>
+
+    <p id="msg"></p>
+  </section>
+</div>
+
+<div id="mainSite" style="display:none;">
+
+<header>
+  <h3>PCC</h3>
+  <div class="pfp" id="pfp" onclick="toggleMenu()">U</div>
+</header>
+
+<div class="menu" id="menu">
+  <div onclick="logout()">Logout</div>
+</div>
+
+<section>
+  <h2>Welcome 🎨</h2>
+  <p>You are logged in to Praneeth Creativity Certificates.</p>
+
+  <p>🎨 Drawing</p>
+  <p>🗿 Sculpting</p>
+  <p>🔬 Science</p>
+  <p>🧠 Thinking</p>
+</section>
+
+</div>
+
+<script>
+async function hashPassword(password) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+}
+
+let users = JSON.parse(localStorage.getItem("users")) || {};
+
+async function signup() {
+  const u = username.value.trim();
+  const p = password.value.trim();
+
+  if (!u || !p) {
+    msg.innerText = "Fill all fields";
+    return;
+  }
+
+  if (users[u]) {
+    msg.innerText = "Username already exists";
+    return;
+  }
+
+  const hashed = await hashPassword(p);
+  users[u] = hashed;
+  localStorage.setItem("users", JSON.stringify(users));
+  msg.innerText = "Signed up! Now login.";
+}
+
+async function login() {
+  const u = username.value.trim();
+  const p = password.value.trim();
+
+  if (!users[u]) {
+    msg.innerText = "Invalid username or password";
+    return;
+  }
+
+  const hashed = await hashPassword(p);
+
+  if (users[u] === hashed) {
+    localStorage.setItem("currentUser", u);
+    showSite();
+  } else {
+    msg.innerText = "Invalid username or password";
+  }
+}
+
+function showSite() {
+  authScreen.style.display = "none";
+  mainSite.style.display = "block";
+  const u = localStorage.getItem("currentUser");
+  pfp.innerText = u[0].toUpperCase();
+}
+
+function logout() {
+  localStorage.removeItem("currentUser");
+  location.reload();
+}
+
+function toggleMenu() {
+  menu.style.display = menu.style.display === "block" ? "none" : "block";
+}
+
+if (localStorage.getItem("currentUser")) {
+  showSite();
+}
+</script>
+
+</body>
+</html>
